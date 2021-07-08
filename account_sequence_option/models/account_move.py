@@ -37,6 +37,13 @@ class AccountMove(models.Model):
             if sequence:
                 rec.name = "/"
 
+    # Bypass constrains if sequence is defined
+    def _constrains_date_sequence(self):
+        for record in self:
+            sequence = self.env["sequence.option"].get_sequence(record)
+            if not sequence:
+                record.super()._constrains_date_sequence()
+
     def _get_last_sequence_domain(self, relaxed=False):
         (where_string, param) = super()._get_last_sequence_domain(relaxed=relaxed)
         where_string += " AND coalesce(sequence_option, false) = false "
